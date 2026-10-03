@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="brand-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#8b5cf6" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#0f172a" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <!-- Background with smooth rounded corners -->
+  <rect width="512" height="512" rx="112" fill="url(#brand-grad)" />
+  <!-- Central Stylized Compass / Hub Icon -->
+  <g filter="url(#shadow)" fill="#ffffff" transform="translate(256, 256)">
+    <!-- Outer accent ring -->
+    <circle r="120" fill="none" stroke="#ffffff" stroke-width="12" stroke-opacity="0.35" />
+    <!-- 4-point star / diamond compass -->
+    <path d="M 0,-140 Q 24,-24 140,0 Q 24,24 0,140 Q -24,24 -140,0 Q -24,-24 0,-140 Z" fill="#ffffff" />
+    <!-- Inner central circle -->
+    <circle r="36" fill="#2563eb" />
+    <circle r="16" fill="#ffffff" />
+  </g>
+</svg>

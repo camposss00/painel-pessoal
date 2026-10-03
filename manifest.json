@@ -1,0 +1,76 @@
+{
+  "name": "Painel Pessoal",
+  "short_name": "Painel",
+  "description": "Sistema central para organizar tarefas, estudos, agenda, projetos, finanças, hábitos, metas e anotações.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#2563eb",
+  "background_color": "#0b0f19",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "categories": ["productivity", "utilities", "education", "finance"],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Minhas Tarefas",
+      "short_name": "Tarefas",
+      "description": "Ver e gerenciar tarefas pendentes",
+      "url": "./index.html#view-tasks",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Agenda & Calendário",
+      "short_name": "Agenda",
+      "description": "Consultar compromissos do dia",
+      "url": "./index.html#view-calendar",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Hábitos Diários",
+      "short_name": "Hábitos",
+      "description": "Registrar hábitos de hoje",
+      "url": "./index.html#view-habits",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Controle Financeiro",
+      "short_name": "Finanças",
+      "description": "Registrar despesas e receitas",
+      "url": "./index.html#view-finance",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

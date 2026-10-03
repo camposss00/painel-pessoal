@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Painel Pessoal &bull; Meu Sistema Central de Organização</title>
+  
+  <!-- PWA Manifest & Meta Tags -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2563eb" id="meta-theme-color">
+  <meta name="description" content="Sistema central para organizar tarefas, estudos, agenda, projetos, finanças, hábitos, metas e anotações.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Painel Pessoal">
+
+  <!-- Icons & Favicon -->
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/modules.css">
+
+  <!-- External Libraries: Lucide Icons & Chart.js -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <div id="app-layout">
+    <!-- Mobile Backdrop -->
+    <div id="sidebar-backdrop"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">
+          <i data-lucide="compass" style="width: 20px; height: 20px;"></i>
+        </div>
+        <div class="brand-text">
+          <h1>Painel Pessoal</h1>
+          <p>Sistema Central</p>
+        </div>
+        <button class="btn-icon" id="sidebar-close-btn" style="margin-left: auto; display: none;" aria-label="Fechar menu">
+          <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-link active" data-target="view-dashboard">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Dashboard</span>
+        </button>
+
+        <button class="nav-link" data-target="view-tasks">
+          <i data-lucide="check-square"></i>
+          <span>Tarefas</span>
+          <span class="nav-counter" id="nav-task-count" style="display: none;">0</span>
+        </button>
+
+        <button class="nav-link" data-target="view-calendar">
+          <i data-lucide="calendar"></i>
+          <span>Agenda</span>
+        </button>
+
+        <button class="nav-link" data-target="view-studies">
+          <i data-lucide="graduation-cap"></i>
+          <span>Estudos</span>
+        </button>
+
+        <button class="nav-link" data-target="view-projects">
+          <i data-lucide="folder-git-2"></i>
+          <span>Projetos</span>
+        </button>
+
+        <button class="nav-link" data-target="view-finance">
+          <i data-lucide="wallet"></i>
+          <span>Finanças</span>
+        </button>
+
+        <button class="nav-link" data-target="view-habits">
+          <i data-lucide="flame"></i>
+          <span>Hábitos</span>
+        </button>
+
+        <button class="nav-link" data-target="view-goals">
+          <i data-lucide="target"></i>
+          <span>Metas</span>
+        </button>
+
+        <button class="nav-link" data-target="view-notes">
+          <i data-lucide="sticky-note"></i>
+          <span>Notas</span>
+        </button>
+
+        <button class="nav-link" data-target="view-settings">
+          <i data-lucide="settings"></i>
+          <span>Configurações</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="theme-toggle-btn" id="theme-toggle-btn" title="Alternar tema escuro/claro">
+          <span style="display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="moon" id="theme-icon" style="width: 16px; height: 16px;"></i>
+            <span id="theme-text">Modo Escuro</span>
+          </span>
+          <i data-lucide="chevron-right" style="width: 14px; height: 14px; color: var(--text-light);"></i>
+        </button>
+
+        <button class="btn btn-primary btn-sm" id="btn-install-pwa" style="display: none; width: 100%; margin-top: 6px; justify-content: center; gap: 6px;" title="Instalar Painel Pessoal no seu dispositivo">
+          <i data-lucide="download" style="width: 14px; height: 14px;"></i>
+          <span>Instalar Aplicativo</span>
+        </button>
+
+        <div style="display: flex; gap: var(--space-2); margin-top: 4px;">
+          <button class="btn btn-outline btn-sm" id="btn-export-data" style="flex: 1; font-size: 0.75rem;" title="Baixar arquivo JSON com todos os dados salvos">
+            <i data-lucide="download" style="width: 13px; height: 13px;"></i> Backup
+          </button>
+          <button class="btn btn-outline btn-sm" id="btn-import-data" style="flex: 1; font-size: 0.75rem;" title="Restaurar dados a partir de arquivo JSON">
+            <i data-lucide="upload" style="width: 13px; height: 13px;"></i> Restaurar
+          </button>
+          <input type="file" id="import-file-input" accept=".json" style="display: none;">
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div id="main-wrapper">
+      <!-- Topbar Header -->
+      <header id="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle-btn" id="menu-toggle-btn" aria-label="Abrir menu">
+            <i data-lucide="menu" style="width: 22px; height: 22px;"></i>
+          </button>
+          <h2 class="topbar-title" id="topbar-title-text">Dashboard</h2>
+        </div>
+
+        <div class="topbar-right">
+          <div class="current-date-badge">
+            <i data-lucide="clock" style="width: 15px; height: 15px; color: var(--primary);"></i>
+            <span class="full-date" id="topbar-date-display"></span>
+          </div>
+        </div>
+      </header>
+
+      <!-- View Containers -->
+      <main id="content-area">
+
+        <!-- ==================================================================
+             1. VIEW: DASHBOARD
+             ================================================================== -->
+        <section id="view-dashboard" class="view-section active">
+          <!-- Overdue Alert Banner (dynamic) -->
+          <div id="dash-overdue-alert-container"></div>
+
+          <!-- Greeting Card with Quick Action Buttons -->
+          <div class="dashboard-header-card">
+            <div class="dashboard-greeting">
+              <h2 id="dash-greeting-text">Olá!</h2>
+              <p id="dash-today-date">Carregando resumo do dia...</p>
+            </div>
+            <div class="dashboard-shortcuts">
+              <button class="btn btn-primary btn-sm" id="dash-btn-new-task">
+                <i data-lucide="plus"></i> Tarefa
+              </button>
+              <button class="btn btn-secondary btn-sm" id="dash-btn-new-habit">
+                <i data-lucide="flame"></i> Hábito
+              </button>
+              <button class="btn btn-secondary btn-sm" id="dash-btn-new-expense">
+                <i data-lucide="minus-circle"></i> Gasto
+              </button>
+              <button class="btn btn-secondary btn-sm" id="dash-btn-new-exam">
+                <i data-lucide="book-open"></i> Prova
+              </button>
+              <button class="btn btn-secondary btn-sm" id="dash-btn-new-project">
+                <i data-lucide="folder-plus"></i> Projeto
+              </button>
+              <button class="btn btn-secondary btn-sm" id="dash-btn-new-goal">
+                <i data-lucide="target"></i> Meta
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Stats Cards Grid -->
+          <div class="stats-grid">
+            <div class="stat-card" style="cursor: pointer;" onclick="navigateToView('view-tasks')">
+              <div class="stat-icon primary">
+                <i data-lucide="check-circle-2"></i>
+              </div>
+              <div class="stat-details">
+                <span class="stat-label">Tarefas Pendentes</span>
+                <span class="stat-value" id="dash-stat-tasks">0</span>
+                <span class="stat-subtitle" id="dash-stat-tasks-sub">Em dia</span>
+              </div>
+            </div>
+
+            <div class="stat-card" style="cursor: pointer;" onclick="navigateToView('view-habits')">
+              <div class="stat-icon purple">
+                <i data-lucide="flame"></i>
+              </div>
+              <div class="stat-details">
+                <span class="stat-label">Hábitos de Hoje</span>
+                <span class="stat-value" id="dash-stat-habits">0/0</span>
+                <span class="stat-subtitle" id="dash-stat-habits-sub">Concluídos</span>
+              </div>
+            </div>
+
+            <div class="stat-card" style="cursor: pointer;" onclick="navigateToView('view-studies')">
+              <div class="stat-icon warning">
+                <i data-lucide="graduation-cap"></i>
+              </div>
+              <div class="stat-details">
+                <span class="stat-label">Próxima Prova</span>
+                <span class="stat-value" id="dash-stat-exam" style="font-size: 1.25rem;">--</span>
+                <span class="stat-subtitle" id="dash-stat-exam-sub">Avaliações agendadas</span>
+              </div>
+            </div>
+
+            <div class="stat-card" style="cursor: pointer;" onclick="navigateToView('view-finance')">
+              <div class="stat-icon success">
+                <i data-lucide="wallet"></i>
+              </div>
+              <div class="stat-details">
+                <span class="stat-label">Saldo Acumulado</span>
+                <span class="stat-value" id="dash-stat-balance" style="font-size: 1.25rem;">R$ 0,00</span>
+                <span class="stat-subtitle">Histórico financeiro</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Widgets Section Grid -->
+          <div class="dashboard-widgets-grid">
+            <!-- Widget: Prioritized Tasks (Overdue & Today & High) -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i data-lucide="list-todo" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                  Prioridades & Tarefas
+                </h3>
+                <button class="btn btn-outline btn-sm" onclick="navigateToView('view-tasks')">Ver todas</button>
+              </div>
+              <div id="dash-tasks-widget" class="widget-item-list"></div>
+            </div>
+
+            <!-- Widget: Habits of Today (inline toggle) -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i data-lucide="flame" style="width: 18px; height: 18px; color: var(--color-purple);"></i>
+                  Hábitos de Hoje
+                </h3>
+                <button class="btn btn-outline btn-sm" onclick="navigateToView('view-habits')">Hábitos</button>
+              </div>
+              <div id="dash-habits-widget" class="widget-item-list"></div>
+            </div>
+
+            <!-- Widget: Upcoming Agenda & Exams -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i data-lucide="calendar-clock" style="width: 18px; height: 18px; color: var(--color-warning);"></i>
+                  Próximos Compromissos & Provas
+                </h3>
+                <button class="btn btn-outline btn-sm" onclick="navigateToView('view-calendar')">Agenda</button>
+              </div>
+              <div id="dash-agenda-widget" class="widget-item-list"></div>
+            </div>
+
+            <!-- Widget: Goals in Progress -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i data-lucide="target" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                  Metas em Andamento
+                </h3>
+                <button class="btn btn-outline btn-sm" onclick="navigateToView('view-goals')">Ver metas</button>
+              </div>
+              <div id="dash-goals-widget"></div>
+            </div>
+
+            <!-- Widget: Monthly Financial Snapshot -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i data-lucide="pie-chart" style="width: 18px; height: 18px; color: var(--color-success);"></i>
+                  Finanças do Mês
+                </h3>
+                <button class="btn btn-outline btn-sm" onclick="navigateToView('view-finance')">Detalhes</button>
+              </div>
+              <div id="dash-finance-widget"></div>
+            </div>
+
+            <!-- Widget: Active Projects -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i data-lucide="code" style="width: 18px; height: 18px; color: var(--color-purple);"></i>
+                  Projetos Ativos
+                </h3>
+                <button class="btn btn-outline btn-sm" onclick="navigateToView('view-projects')">Ver projetos</button>
+              </div>
+              <div id="dash-projects-widget" class="widget-item-list"></div>
+            </div>
+
+            <!-- Widget: Studies Attention Alert -->
+            <div class="card" style="grid-column: 1 / -1;">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i data-lucide="alert-triangle" style="width: 18px; height: 18px; color: var(--color-warning);"></i>
+                  Estudos & Matérias que Precisam de Atenção
+                </h3>
+                <button class="btn btn-outline btn-sm" onclick="navigateToView('view-studies')">Ver Estudos</button>
+              </div>
+              <div id="dash-studies-attention-widget" class="widget-item-list"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             2. VIEW: TAREFAS
+             ================================================================== -->
+        <section id="view-tasks" class="view-section">
+          <div class="tasks-toolbar">
+            <div style="display: flex; align-items: baseline; gap: var(--space-3);">
+              <h2 style="font-size: 1.3rem; font-weight: 700;">Gerenciador de Tarefas</h2>
+              <span id="tasks-pending-header-count" style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">0 pendentes</span>
+            </div>
+            <button class="btn btn-primary" id="btn-new-task">
+              <i data-lucide="plus"></i> Nova Tarefa
+            </button>
+          </div>
+
+          <!-- Filters & Search Toolbar -->
+          <div class="filter-bar">
+            <div class="search-input-wrapper">
+              <i data-lucide="search" style="width: 16px; height: 16px;"></i>
+              <input type="text" id="task-search" class="form-control" placeholder="Pesquisar por título ou descrição...">
+            </div>
+
+            <div class="filter-actions">
+              <div class="filter-chips">
+                <button class="filter-chip task-filter-chip active" data-filter="all">Todas</button>
+                <button class="filter-chip task-filter-chip" data-filter="pending">Pendentes</button>
+                <button class="filter-chip task-filter-chip" data-filter="today">Hoje</button>
+                <button class="filter-chip task-filter-chip" data-filter="overdue">Atrasadas</button>
+                <button class="filter-chip task-filter-chip" data-filter="future">Futuras</button>
+                <button class="filter-chip task-filter-chip" data-filter="completed">Concluídas</button>
+              </div>
+
+              <select id="task-priority-filter" class="form-select" style="width: auto;">
+                <option value="all">Todas as Prioridades</option>
+                <option value="high">Alta Prioridade</option>
+                <option value="medium">Média Prioridade</option>
+                <option value="low">Baixa Prioridade</option>
+              </select>
+
+              <select id="task-category-filter" class="form-select" style="width: auto;">
+                <option value="all">Todas as Categorias</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Tasks List -->
+          <div id="tasks-list-container" class="task-list"></div>
+        </section>
+
+        <!-- ==================================================================
+             3. VIEW: AGENDA / CALENDÁRIO
+             ================================================================== -->
+        <section id="view-calendar" class="view-section">
+          <div class="calendar-wrapper">
+            <div class="calendar-header">
+              <div style="display: flex; align-items: center; gap: var(--space-3);">
+                <h2 class="calendar-month-title" id="cal-title-display">Agenda</h2>
+                <div class="filter-chips">
+                  <button class="filter-chip active" id="cal-view-month-btn">Mês</button>
+                  <button class="filter-chip" id="cal-view-day-btn">Dia</button>
+                </div>
+              </div>
+
+              <div class="calendar-nav-buttons">
+                <button class="btn btn-outline btn-sm" id="cal-today-btn">Hoje</button>
+                <button class="btn btn-outline btn-icon" id="cal-prev-btn" title="Anterior">
+                  <i data-lucide="chevron-left" style="width: 16px; height: 16px;"></i>
+                </button>
+                <button class="btn btn-outline btn-icon" id="cal-next-btn" title="Próximo">
+                  <i data-lucide="chevron-right" style="width: 16px; height: 16px;"></i>
+                </button>
+                <button class="btn btn-primary btn-sm" id="btn-new-cal-event" style="margin-left: var(--space-2);">
+                  <i data-lucide="plus"></i> Novo Evento
+                </button>
+              </div>
+            </div>
+
+            <!-- Month View Container -->
+            <div id="calendar-month-view-container">
+              <div class="calendar-weekdays">
+                <div>DOM</div>
+                <div>SEG</div>
+                <div>TER</div>
+                <div>QUA</div>
+                <div>QUI</div>
+                <div>SEX</div>
+                <div>SÁB</div>
+              </div>
+              <div class="calendar-grid" id="calendar-grid"></div>
+            </div>
+
+            <!-- Day View Container -->
+            <div id="calendar-day-view-container" style="display: none;">
+              <div id="calendar-day-agenda-list" style="margin-top: var(--space-4);"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             4. VIEW: ESTUDOS
+             ================================================================== -->
+        <section id="view-studies" class="view-section">
+          <!-- Countdown Highlight Banner -->
+          <div id="studies-countdown-container"></div>
+
+          <!-- Academic Overview Stats -->
+          <div class="stats-grid" id="studies-overview-stats"></div>
+
+          <div class="studies-layout" style="margin-top: var(--space-6);">
+            <!-- Left Column: Matérias & Notas -->
+            <div>
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-4);">
+                <div>
+                  <h3 style="font-size: 1.2rem; font-weight: 700;">Minhas Matérias & Médias</h3>
+                  <p style="font-size: 0.85rem; color: var(--text-muted);">Acompanhamento de desempenho acadêmico</p>
+                </div>
+                <button class="btn btn-primary btn-sm" id="btn-new-subject">
+                  <i data-lucide="plus"></i> Nova Matéria
+                </button>
+              </div>
+
+              <div id="subjects-grid-container" class="subjects-grid"></div>
+
+              <!-- Study Sessions History Section -->
+              <div class="card" style="margin-top: var(--space-6);">
+                <div class="card-header">
+                  <div>
+                    <h4 class="card-title">
+                      <i data-lucide="clock" style="width: 18px; height: 18px; color: var(--color-success);"></i>
+                      Registro de Horas de Estudo
+                    </h4>
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">Total acumulado: <strong id="total-study-hours">0h</strong></span>
+                  </div>
+                  <button class="btn btn-outline btn-sm" id="btn-new-study-session">
+                    <i data-lucide="plus"></i> Registrar Estudo
+                  </button>
+                </div>
+                <div id="study-sessions-container" class="widget-item-list"></div>
+              </div>
+            </div>
+
+            <!-- Right Column: Provas e Trabalhos Agendados -->
+            <div>
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">
+                    <i data-lucide="calendar" style="width: 18px; height: 18px; color: var(--color-purple);"></i>
+                    Provas & Trabalhos
+                  </h3>
+                  <button class="btn btn-primary btn-sm" id="btn-new-exam">
+                    <i data-lucide="plus"></i> Agendar
+                  </button>
+                </div>
+                <div id="exams-list-container" class="widget-item-list"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             5. VIEW: PROJETOS
+             ================================================================== -->
+        <section id="view-projects" class="view-section">
+          <div class="tasks-toolbar">
+            <div>
+              <h2 style="font-size: 1.3rem; font-weight: 700;">Meus Projetos Pessoais</h2>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">Acompanhe status, prazos, tecnologias e checklists</p>
+            </div>
+            <button class="btn btn-primary" id="btn-new-project">
+              <i data-lucide="plus"></i> Novo Projeto
+            </button>
+          </div>
+
+          <!-- Status Filters -->
+          <div class="filter-bar">
+            <div class="filter-chips">
+              <button class="filter-chip project-filter-chip active" data-status="all">Todos</button>
+              <button class="filter-chip project-filter-chip" data-status="ideia">Ideia</button>
+              <button class="filter-chip project-filter-chip" data-status="planejamento">Planejamento</button>
+              <button class="filter-chip project-filter-chip" data-status="desenvolvimento">Em Desenvolvimento</button>
+              <button class="filter-chip project-filter-chip" data-status="concluido">Concluído</button>
+              <button class="filter-chip project-filter-chip" data-status="pausado">Pausado</button>
+            </div>
+          </div>
+
+          <!-- Projects Cards Grid -->
+          <div id="projects-grid-container" class="projects-grid"></div>
+        </section>
+
+        <!-- ==================================================================
+             6. VIEW: FINANCEIRO
+             ================================================================== -->
+        <section id="view-finance" class="view-section">
+          <!-- Finance Top Toolbar -->
+          <div class="tasks-toolbar">
+            <div style="display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap;">
+              <h2 style="font-size: 1.3rem; font-weight: 700;">Controle Financeiro</h2>
+              <div style="display: flex; gap: var(--space-2);">
+                <select id="finance-month-select" class="form-select" style="width: auto;"></select>
+                <select id="finance-year-select" class="form-select" style="width: auto;"></select>
+              </div>
+            </div>
+            <button class="btn btn-primary" id="btn-new-transaction">
+              <i data-lucide="plus"></i> Nova Movimentação
+            </button>
+          </div>
+
+          <!-- Finance Stats Overview -->
+          <div class="finance-overview-grid">
+            <div class="stat-card finance-card-balance">
+              <div class="stat-icon primary">
+                <i data-lucide="landmark"></i>
+              </div>
+              <div class="stat-details">
+                <span class="stat-label">Saldo Acumulado Geral</span>
+                <span class="stat-value" id="finance-overall-balance">R$ 0,00</span>
+                <span class="stat-subtitle">Histórico total</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon success">
+                <i data-lucide="trending-up"></i>
+              </div>
+              <div class="stat-details">
+                <span class="stat-label">Entradas no Mês</span>
+                <span class="stat-value" id="finance-month-income" style="color: var(--color-success);">R$ 0,00</span>
+                <span class="stat-subtitle">Receitas</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon danger">
+                <i data-lucide="trending-down"></i>
+              </div>
+              <div class="stat-details">
+                <span class="stat-label">Gastos no Mês</span>
+                <span class="stat-value" id="finance-month-expense" style="color: var(--color-danger);">R$ 0,00</span>
+                <span class="stat-subtitle">Despesas</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon purple">
+                <i data-lucide="scale"></i>
+              </div>
+              <div class="stat-details">
+                <span class="stat-label">Resultado do Mês</span>
+                <span class="stat-value" id="finance-month-net">R$ 0,00</span>
+                <span class="stat-subtitle">Entradas - Gastos</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Finance Layout Grid: Transactions Table + Breakdown Chart -->
+          <div class="finance-layout">
+            <!-- Left: Transactions Table -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
+                  <i data-lucide="receipt" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                  Histórico de Transações
+                </h3>
+              </div>
+              <div class="transactions-table-wrapper">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Data</th>
+                      <th>Descrição</th>
+                      <th>Categoria</th>
+                      <th>Valor</th>
+                      <th style="text-align: right;">Ação</th>
+                    </tr>
+                  </thead>
+                  <tbody id="transactions-table-body"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Right: Expenses by Category Chart & Top Expenses -->
+            <div>
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">
+                    <i data-lucide="pie-chart" style="width: 18px; height: 18px; color: var(--color-purple);"></i>
+                    Despesas por Categoria
+                  </h3>
+                </div>
+                <div style="height: 180px; position: relative; margin-bottom: var(--space-3);">
+                  <canvas id="finance-chart"></canvas>
+                </div>
+                <div id="finance-category-breakdown"></div>
+              </div>
+
+              <div class="card" style="margin-top: var(--space-4);">
+                <div class="card-header">
+                  <h4 class="card-title">
+                    <i data-lucide="trending-down" style="width: 18px; height: 18px; color: var(--color-danger);"></i>
+                    Maiores Gastos do Mês
+                  </h4>
+                </div>
+                <div id="finance-top-expenses-list" class="widget-item-list"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             7. VIEW: HÁBITOS (NOVO)
+             ================================================================== -->
+        <section id="view-habits" class="view-section">
+          <div class="tasks-toolbar">
+            <div>
+              <h2 style="font-size: 1.3rem; font-weight: 700;">Acompanhamento de Hábitos</h2>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">Construa consistência e acompanhe suas sequências diárias</p>
+            </div>
+            <button class="btn btn-primary" id="btn-new-habit">
+              <i data-lucide="plus"></i> Novo Hábito
+            </button>
+          </div>
+
+          <div class="filter-bar">
+            <select id="habit-category-filter" class="form-select" style="width: auto;">
+              <option value="all">Todas as Categorias</option>
+            </select>
+          </div>
+
+          <div id="habits-grid-container" class="habits-grid"></div>
+        </section>
+
+        <!-- ==================================================================
+             8. VIEW: METAS (NOVO)
+             ================================================================== -->
+        <section id="view-goals" class="view-section">
+          <div class="tasks-toolbar">
+            <div>
+              <h2 style="font-size: 1.3rem; font-weight: 700;">Objetivos & Metas Pessoais</h2>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">Defina objetivos claros, etapas de ação e acompanhe o progresso</p>
+            </div>
+            <button class="btn btn-primary" id="btn-new-goal">
+              <i data-lucide="plus"></i> Nova Meta
+            </button>
+          </div>
+
+          <div class="filter-bar">
+            <div class="filter-chips">
+              <button class="filter-chip goal-filter-chip active" data-status="all">Todas</button>
+              <button class="filter-chip goal-filter-chip" data-status="active">Em Andamento</button>
+              <button class="filter-chip goal-filter-chip" data-status="completed">Concluídas</button>
+              <button class="filter-chip goal-filter-chip" data-status="paused">Pausadas</button>
+            </div>
+          </div>
+
+          <div id="goals-grid-container" class="goals-grid"></div>
+        </section>
+
+        <!-- ==================================================================
+             9. VIEW: NOTAS (NOVO)
+             ================================================================== -->
+        <section id="view-notes" class="view-section">
+          <div class="tasks-toolbar">
+            <div>
+              <h2 style="font-size: 1.3rem; font-weight: 700;">Bloco de Notas & Ideias</h2>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">Anotações rápidas com fixação e busca instantânea</p>
+            </div>
+            <button class="btn btn-primary" id="btn-new-note">
+              <i data-lucide="plus"></i> Nova Anotação
+            </button>
+          </div>
+
+          <div class="filter-bar">
+            <div class="search-input-wrapper">
+              <i data-lucide="search" style="width: 16px; height: 16px;"></i>
+              <input type="text" id="notes-search-input" class="form-control" placeholder="Buscar por título ou conteúdo...">
+            </div>
+            <select id="notes-category-filter" class="form-select" style="width: auto;">
+              <option value="all">Todas as Categorias</option>
+            </select>
+          </div>
+
+          <div id="notes-grid-container" class="notes-grid"></div>
+        </section>
+
+        <!-- ==================================================================
+             10. VIEW: CONFIGURAÇÕES (NOVO)
+             ================================================================== -->
+        <section id="view-settings" class="view-section">
+          <div class="tasks-toolbar" style="margin-bottom: var(--space-4);">
+            <div>
+              <h2 style="font-size: 1.3rem; font-weight: 700;">Configurações & Dados</h2>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">Personalização, preferências e gerenciamento do armazenamento local</p>
+            </div>
+          </div>
+
+          <div class="settings-container">
+            <!-- Profile Preferences Card -->
+            <div class="card settings-card">
+              <h3 class="card-title" style="margin-bottom: var(--space-4);">
+                <i data-lucide="user" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                Preferências Pessoais
+              </h3>
+              <form id="settings-profile-form">
+                <div class="form-group">
+                  <label class="form-label" for="settings-user-name">Como você gostaria de ser chamado?</label>
+                  <input type="text" id="settings-user-name" class="form-control" placeholder="Ex: Bryan">
+                  <span class="form-hint">Este nome será utilizado na saudação personalizada do Dashboard.</span>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm" style="margin-top: var(--space-2);">Salvar Preferências</button>
+              </form>
+            </div>
+
+            <!-- Theme Card -->
+            <div class="card settings-card">
+              <h3 class="card-title" style="margin-bottom: var(--space-4);">
+                <i data-lucide="palette" style="width: 18px; height: 18px; color: var(--color-purple);"></i>
+                Aparência & Tema
+              </h3>
+              <div style="display: flex; gap: var(--space-6);">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                  <input type="radio" name="settings-theme" value="light">
+                  <span>Modo Claro</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                  <input type="radio" name="settings-theme" value="dark">
+                  <span>Modo Escuro</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Storage Stats & Backup Card -->
+            <div class="card settings-card">
+              <h3 class="card-title" style="margin-bottom: var(--space-4);">
+                <i data-lucide="database" style="width: 18px; height: 18px; color: var(--color-success);"></i>
+                Armazenamento Local & Backup
+              </h3>
+              <div id="settings-storage-stats" style="margin-bottom: var(--space-4);"></div>
+              <div style="display: flex; gap: var(--space-3); flex-wrap: wrap;">
+                <button class="btn btn-outline btn-sm" onclick="document.getElementById('btn-export-data').click()">
+                  <i data-lucide="download"></i> Exportar Arquivo de Backup
+                </button>
+                <button class="btn btn-outline btn-sm" onclick="document.getElementById('btn-import-data').click()">
+                  <i data-lucide="upload"></i> Restaurar Arquivo de Backup
+                </button>
+              </div>
+            </div>
+
+            <!-- PWA App Installation Card -->
+            <div class="card settings-card">
+              <h3 class="card-title" style="margin-bottom: var(--space-4);">
+                <i data-lucide="smartphone" style="width: 18px; height: 18px; color: var(--primary);"></i>
+                Aplicativo (PWA)
+              </h3>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: var(--space-3);">
+                O Painel Pessoal pode ser instalado no seu computador, tablet ou celular para funcionar como um aplicativo nativo, com abertura rápida e suporte offline.
+              </p>
+              <div style="display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap;">
+                <button class="btn btn-primary btn-sm" id="btn-install-pwa-settings" style="display: none;">
+                  <i data-lucide="download"></i> Instalar no Dispositivo
+                </button>
+                <span id="pwa-status-badge" class="badge" style="background: rgba(34, 197, 94, 0.15); color: #16a34a; font-weight: 600; padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px;">
+                  <i data-lucide="check-circle-2" style="width: 14px; height: 14px;"></i> Pronto para uso offline
+                </span>
+              </div>
+            </div>
+
+            <!-- Danger Zone Card -->
+            <div class="card settings-card" style="border-color: rgba(239, 68, 68, 0.3);">
+              <h3 class="card-title" style="color: var(--color-danger); margin-bottom: var(--space-3);">
+                <i data-lucide="alert-octagon" style="width: 18px; height: 18px; color: var(--color-danger);"></i>
+                Zona de Perigo
+              </h3>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: var(--space-4);">
+                Caso queira recomeçar do zero, você pode limpar todos os registros armazenados no navegador.
+              </p>
+              <button class="btn btn-danger btn-sm" id="btn-clear-all-data">
+                <i data-lucide="trash-2"></i> Limpar Todos os Dados
+              </button>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODALS DIALOGS
+       ========================================================================== -->
+
+  <!-- Modal: Nova / Editar Tarefa -->
+  <div class="modal-overlay" id="task-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="task-modal-title">Nova Tarefa</h3>
+        <button class="btn-icon modal-close" aria-label="Fechar">&times;</button>
+      </div>
+      <form id="task-form">
+        <input type="hidden" id="task-id">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="task-input-title">Título <span class="required">*</span></label>
+            <input type="text" id="task-input-title" class="form-control" placeholder="Ex: Entregar relatório de cálculo" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="task-input-description">Descrição / Detalhes</label>
+            <textarea id="task-input-description" class="form-textarea" placeholder="Instruções ou notas sobre a tarefa..."></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="task-input-priority">Prioridade</label>
+              <select id="task-input-priority" class="form-select">
+                <option value="low">Baixa</option>
+                <option value="medium" selected>Média</option>
+                <option value="high">Alta</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="task-input-category">Categoria</label>
+              <input type="text" id="task-input-category" class="form-control" placeholder="Ex: Faculdade, Trabalho, Casa">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="task-input-duedate">Data de Vencimento</label>
+              <input type="date" id="task-input-duedate" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="task-input-recurrence">Recorrência</label>
+              <select id="task-input-recurrence" class="form-select">
+                <option value="none">Nenhuma</option>
+                <option value="daily">Diária (todo dia)</option>
+                <option value="weekly">Semanal (toda semana)</option>
+                <option value="monthly">Mensal (todo mês)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary modal-cancel-btn">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar Tarefa</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Nova / Editar Matéria -->
+  <div class="modal-overlay" id="subject-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="subject-modal-title">Nova Matéria</h3>
+        <button class="btn-icon modal-close" aria-label="Fechar">&times;</button>
+      </div>
+      <form id="subject-form">
+        <input type="hidden" id="subject-id">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="subject-name">Nome da Matéria <span class="required">*</span></label>
+            <input type="text" id="subject-name" class="form-control" placeholder="Ex: Algoritmos e Estrutura de Dados" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="subject-professor">Professor / Horários</label>
+            <input type="text" id="subject-professor" class="form-control" placeholder="Ex: Prof. Carlos - Seg e Qua 19h">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary modal-cancel-btn">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar Matéria</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Lançar Nota -->
+  <div class="modal-overlay" id="grade-modal">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <h3 class="modal-title">Lançar Nota</h3>
+        <button class="btn-icon modal-close" aria-label="Fechar">&times;</button>
+      </div>
+      <form id="grade-form">
+        <input type="hidden" id="grade-subject-id">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="grade-label">Identificação</label>
+            <input type="text" id="grade-label" class="form-control" placeholder="Ex: P1, P2, Trabalho Semestral">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="grade-value">Nota (0 a 10) <span class="required">*</span></label>
+            <input type="number" id="grade-value" class="form-control" step="0.1" min="0" max="10" placeholder="Ex: 8.5" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary modal-cancel-btn">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Lançar Nota</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Agendar / Editar Prova ou Trabalho -->
+  <div class="modal-overlay" id="exam-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="exam-modal-title">Agendar Avaliação</h3>
+        <button class="btn-icon modal-close" aria-label="Fechar">&times;</button>
+      </div>
+      <form id="exam-form">
+        <input type="hidden" id="exam-id">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="exam-title">Título <span class="required">*</span></label>
+            <input type="text" id="exam-title" class="form-control" placeholder="Ex: Prova Final de Cálculo I" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="exam-type">Tipo</label>
+              <select id="exam-type" class="form-select">
+                <option value="prova">Prova</option>
+                <option value="trabalho">Trabalho / Seminário</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="exam-subject-select">Matéria</label>
+              <select id="exam-subject-select" class="form-select"></select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="exam-date">Data da Avaliação <span class="required">*</span></label>
+            <input type="date" id="exam-date" class="form-control" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary modal-cancel-btn">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar Avaliação</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Registrar Sessão de Estudo -->
+  <div class="modal-overlay" id="study-session-modal">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <h3 class="modal-title">Registrar Horas de Estudo</h3>
+        <button class="btn-icon modal-close" aria-label="Fechar">&times;</button>
+      </div>
+      <form id="study-session-form">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="session-subject-select">Matéria / Área</label>
+            <select id="session-subject-select" class="form-select"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="session-topic">Tópico Estudado</label>
+            <input type="text" id="session-topic" class="form-control" placeholder="Ex: Derivadas e Integrais">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="session-minutes">Duração (minutos) <span class="required">*</span></label>
+              <input type="number" id="session-minutes" class="form-control" min="5" step="5" value="60" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="session-date">Data</label>
+              <input type="date" id="session-date" class="form-control" required>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary modal-cancel-btn">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Registrar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Novo / Editar Projeto -->
+  <div class="modal-overlay" id="project-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="project-modal-title">Novo Projeto</h3>
+        <button class="btn-icon modal-close" aria-label="Fechar">&times;</button>
+      </div>
+      <form id="project-form">
+        <input type="hidden" id="project-id">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="project-name">Nome do Projeto <span class="required">*</span></label>
+            <input type="text" id="project-name" class="form-control" placeholder="Ex: Painel Pessoal" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="project-description">Descrição</label>
+            <textarea id="project-description" class="form-textarea" placeholder="Objetivo do projeto, público-alvo ou escopo..."></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="project-status">Status</label>
+              <select id="project-status" class="form-select">
+                <option value="ideia">Ideia</option>
+                <option value="planejamento">Planejamento</option>
+                <option value="desenvolvimento">Em desenvolvimento</option>
+                <option value="concluido">Concluído</option>
+                <option value="pausado">Pausado</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="project-priority">Prioridade</label>
+              <select id="project-priority" class="form-select">
+                <option value="low">Baixa</option>
+                <option value="medium" selected>Média</option>
+                <option value="high">Alta</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="project-deadline">Prazo Previsto</label>
+              <input type="date" id="project-deadline" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="project-tech">Tecnologias (vírgulas)</label>
+              <input type="text" id="project-tech" class="form-control" placeholder="Ex: React, Node.js, PostgreSQL">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="project-github">Link do GitHub</label>
+              <input type="url" id="project-github" class="form-control" placeholder="https://github.com/usuario/repo">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="project-live">Link do Site / Demonstração</label>
+              <input type="url" id="project-live" class="form-control" placeholder="https://meuprojeto.com">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="project-notes">Anotações Gerais</label>
+            <textarea id="project-notes" class="form-textarea" style="min-height: 60px;" placeholder="Ideias futuras, links úteis, lembretes..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary modal-cancel-btn">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar Projeto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Checklist do Projeto -->
+  <div class="modal-overlay" id="project-checklist-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Tarefas de <span id="checklist-project-title"></span></h3>
+        <button class="btn-icon modal-close" aria-label="Fechar">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="checklist-project-id">
+        <div style="display: flex; gap: var(--space-2); margin-bottom: var(--space-4);">
+          <input type="text" id="checklist-new-item-input" class="form-control" placeholder="Adicionar nova tarefa ao projeto...">
+          <button class="btn btn-primary" id="btn-add-checklist-item">Adicionar</button>
+        </div>
+        <div id="checklist-items-container"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary modal-cancel-btn">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Nova / Editar Movimentação Financeira -->
+  <div class="modal-overlay" id="transaction-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="transaction-modal-title">Nova Movimentação Financeira</h3>
+        <button class="btn-icon modal-close" aria-label="Fechar">&times;</button>
+      </div>
+      <form id="transaction-form">
+        <input type="hidden" id="transaction-id">
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="transaction-type">Tipo <span class="required">*</span></label>
+              <select id="transaction-type" class="form-select">
+                <option value="expense">Gasto / Despesa (-)</option>
+                <option value="income">Entrada / Receita (+)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="transaction-amount">Valor (R$) <span class="required">*</span></label>
+              <input type="number" id="transaction-amount" class="form-control" step="0.01" min="0.01" placeholder="Ex: 50.00" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="transaction-description">Descrição <span class="required">*</span></label>
+            <input type="text" id="transaction-description" class="form-control" placeholder="Ex: Almoço, Supermercado, Salário" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="transaction-category">Categoria</label>
+              <input type="text" id="transaction-category" class="form-control" list="default-categories" placeholder="Ex: Alimentação">
+              <datalist id="default-categories">
+                <option value="Alimentação">
+                <option value="Transporte">
+                <option value="Moradia">
+                <option value="Lazer">
+                <option value="Saúde">
+                <option value="Educação">
+                <option value="Salário">
+                <option value="Freelance">
+                <option value="Investimentos">
+                <option value="Outros">
+              </datalist>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="transaction-date">Data <span class="required">*</span></label>
+              <input type="date" id="transaction-date" class="form-control" required>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary modal-cancel-btn">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar Movimentação</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Visualização de Dia no Calendário -->
+  <div class="modal-overlay" id="calendar-day-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="cal-day-modal-title">Detalhes do Dia</h3>
+        <button class="btn-icon modal-close" aria-label="Fechar">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="cal-day-modal-date">
+        <div id="cal-day-items-list" class="widget-item-list"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary modal-cancel-btn">Fechar</button>
+        <button type="button" class="btn btn-primary" id="btn-cal-day-add-event"><i data-lucide="plus"></i> Novo Evento Neste Dia</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Novo / Editar Evento de Calendário -->
+  <div class="modal-overlay" id="calendar-event-modal">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <h3 class="modal-title" id="calendar-event-modal-title">Novo Evento</h3>
+        <button class="btn-icon modal-close" aria-label="Fechar">&times;</button>
+      </div>
+      <form id="calendar-event-form">
+        <input type="hidden" id="cal-event-id">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="cal-event-title">Título <span class="required">*</span></label>
+            <input type="text" id="cal-event-title" class="form-control" placeholder="Ex: Consulta médica, Viagem" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="cal-event-date">Data <span class="required">*</span></label>
+            <input type="date" id="cal-event-date" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="cal-event-description">Descrição / Notas</label>
+            <input type="text" id="cal-event-description" class="form-control" placeholder="Ex: Levar exames">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary modal-cancel-btn">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar Evento</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Novo / Editar Hábito -->
+  <div class="modal-overlay" id="habit-modal">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <h3 class="modal-title" id="habit-modal-title">Novo Hábito</h3>
+        <button class="btn-icon modal-close" aria-label="Fechar">&times;</button>
+      </div>
+      <form id="habit-form">
+        <input type="hidden" id="habit-id">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="habit-name">Nome do Hábito <span class="required">*</span></label>
+            <input type="text" id="habit-name" class="form-control" placeholder="Ex: Ler 20 minutos, Academia" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="habit-category">Categoria</label>
+            <input type="text" id="habit-category" class="form-control" placeholder="Ex: Saúde, Foco, Estudos">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="habit-frequency">Frequência</label>
+            <select id="habit-frequency" class="form-select">
+              <option value="daily">Diário (todos os dias)</option>
+              <option value="weekdays">Segunda a Sexta</option>
+              <option value="3x_week">3 vezes por semana</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary modal-cancel-btn">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar Hábito</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Nova / Editar Meta -->
+  <div class="modal-overlay" id="goal-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="goal-modal-title">Nova Meta</h3>
+        <button class="btn-icon modal-close" aria-label="Fechar">&times;</button>
+      </div>
+      <form id="goal-form">
+        <input type="hidden" id="goal-id">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="goal-title">Título do Objetivo <span class="required">*</span></label>
+            <input type="text" id="goal-title" class="form-control" placeholder="Ex: Aprender TypeScript e React Native" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="goal-description">Descrição / Motivação</label>
+            <textarea id="goal-description" class="form-textarea" placeholder="Por que essa meta é importante?"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="goal-category">Categoria</label>
+              <input type="text" id="goal-category" class="form-control" placeholder="Ex: Carreira, Estudos, Finanças">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="goal-status">Status</label>
+              <select id="goal-status" class="form-select">
+                <option value="active">Em Andamento</option>
+                <option value="completed">Concluída</option>
+                <option value="paused">Pausada</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="goal-deadline">Prazo / Data Limite</label>
+            <input type="date" id="goal-deadline" class="form-control">
+          </div>
+
+          <!-- Milestones sub-list -->
+          <div style="margin-top: var(--space-4); border-top: 1px solid var(--border-subtle); padding-top: var(--space-3);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-2);">
+              <label class="form-label" style="margin-bottom:0;">Etapas / Passos da Meta</label>
+              <button type="button" class="btn btn-outline btn-sm" id="btn-add-milestone-input" style="font-size:0.75rem;">+ Etapa</button>
+            </div>
+            <div id="goal-milestones-input-container"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary modal-cancel-btn">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar Meta</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Nova / Editar Anotação -->
+  <div class="modal-overlay" id="note-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="note-modal-title">Nova Anotação</h3>
+        <button class="btn-icon modal-close" aria-label="Fechar">&times;</button>
+      </div>
+      <form id="note-form">
+        <input type="hidden" id="note-id">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="note-title">Título da Nota</label>
+            <input type="text" id="note-title" class="form-control" placeholder="Ex: Ideias para o projeto">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="note-category">Categoria / Tag</label>
+              <input type="text" id="note-category" class="form-control" placeholder="Ex: Ideias, Estudos, Geral">
+            </div>
+            <div class="form-group" style="justify-content: flex-end;">
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding-bottom: 8px;">
+                <input type="checkbox" id="note-pinned">
+                <span style="font-size: 0.85rem; font-weight: 500;">Fixar nota no topo</span>
+              </label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="note-content">Conteúdo</label>
+            <textarea id="note-content" class="form-textarea" style="min-height: 140px;" placeholder="Escreva sua anotação aqui..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary modal-cancel-btn">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Salvar Anotação</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Confirmação Destrutiva Genérica -->
+  <div class="modal-overlay" id="confirm-modal">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <h3 class="modal-title">Confirmação</h3>
+        <button class="btn-icon modal-close" aria-label="Fechar">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="confirm-modal-message" style="font-size: 0.95rem; color: var(--text-main);"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="confirm-modal-cancel">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="confirm-modal-ok">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <!-- Application Bootstrap Script -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
